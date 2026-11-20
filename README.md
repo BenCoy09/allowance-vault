@@ -1,1 +1,30 @@
-# allowance-vault
+# Allowance Vault
+
+A Bitcoin Cash covenant design that gives an AI agent, bot or device a spending key with built-in limits: per-payment cap, refilling budget, approved recipients, expiry, owner revocation.
+
+Built for BCH BLAZE 2026. Built with Claude (Anthropic) as a coding assistant.
+
+## Status (be skeptical)
+
+| Part | Status |
+| --- | --- |
+| Product site and Security Lab (`src/`) | Implemented |
+| JavaScript reference model of the rules (`src/core.js`) | Implemented, simulation only |
+| CashScript contract (`contracts/AllowanceVault.cash`) | **Unverified draft. Not compiled, not tested, not deployed, not audited.** |
+| Chipnet / mainnet deployment | Not done |
+| Wallet connection, SDK | Not done |
+
+## Run the site
+
+    python3 build.py
+    python3 -m http.server 8080
+    # open http://localhost:8080/index.html
+
+## Next steps
+
+1. Compile the contract with CashScript and fix what breaks.
+2. Write tests for each attack in the Security Lab.
+3. Run them on chipnet, keep raw transactions and node errors.
+4. Mainnet vault with a small balance.
+
+License: MIT
