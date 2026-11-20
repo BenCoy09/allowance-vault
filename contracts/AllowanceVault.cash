@@ -1,0 +1,61 @@
+// UNVERIFIED DRAFT. Not compiled. Not tested. Not deployed. Not audited.
+pragma cashscript ^0.13.0;
+
+contract AllowanceVault(
+    bytes20 ownerPkh,
+    pubkey agentPk,
+    bytes allowedLock1,
+    bytes allowedLock2,
+    int perTxCap,
+    int bucketCap,
+    int refillPerBlock,
+    int maxFee,
+    int expiryHeight,
+    bytes refundLock
+) {
+    // Agent path: one payment, vault continues with updated state.
+    function agentSpend(sig agentSig, int amount, int newHeight) {
+        require(checkSig(agentSig, agentPk));
+        require(tx.inputs.length == 1);
+        require(tx.outputs.length == 2);
+        require(tx.time >= newHeight);          // forces a non-final sequence (CLTV)
+
+        bytes state = tx.inputs[this.activeInputIndex].nftCommitment;
+        bytes bucketBytes, bytes heightBytes = state.split(8);
+        int bucket = int(bucketBytes);
+        int lastHeight = int(heightBytes);
+        require(newHeight >= lastHeight);
+        require(newHeight < expiryHeight);
+
+        bytes payee = tx.outputs[0].lockingBytecode;
+        require(payee == allowedLock1 || payee == allowedLock2);
+        require(tx.outputs[0].tokenCategory == 0x);
+        require(tx.outputs[0].value == amount);
+        require(amount <= perTxCap);
+
+        require(tx.outputs[1].lockingBytecode == tx.inputs[this.activeInputIndex].lockingBytecode);
+        require(tx.outputs[1].tokenCategory == tx.inputs[this.activeInputIndex].tokenCategory);
+
+        int fee = tx.inputs[this.activeInputIndex].value - tx.outputs[0].value - tx.outputs[1].value;
+        require(fee >= 0 && fee <= maxFee);
+
+        int refilled = min(bucketCap, bucket + refillPerBlock * (newHeight - lastHeight));
+        require(amount + fee <= refilled);
+        int newBucket = refilled - amount - fee;
+        require(tx.outputs[1].nftCommitment == bytes8(newBucket) + bytes8(newHeight));
+    }
+
+    // Owner path: revoke or withdraw at any time. No agent cooperation needed.
+    function ownerSweep(pubkey ownerPk, sig ownerSig) {
+        require(hash160(ownerPk) == ownerPkh);
+        require(checkSig(ownerSig, ownerPk));
+    }
+
+    // After expiry anyone may return the funds to the owner's refund address.
+    function expiredReclaim() {
+        require(tx.time >= expiryHeight);
+        require(tx.outputs.length == 1);
+        require(tx.outputs[0].lockingBytecode == refundLock);
+        require(tx.outputs[0].value >= tx.inputs[this.activeInputIndex].value - maxFee);
+    }
+}
