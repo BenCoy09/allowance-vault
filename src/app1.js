@@ -57,11 +57,12 @@ function logo(o) {
   const core = o.mono ? "currentColor" : "#9fb7c4";
   return '<svg viewBox="0 0 40 40" width="' + (o.size || 30) + '" height="' + (o.size || 30) + '"' + cls + ' role="img" aria-label="Allowance Vault logo" fill="none">' + grad +
     '<path class="d" d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5Z" stroke="' + stroke + '" stroke-width="2.4" stroke-linejoin="round"/>' +
-    '<path class="d" d="M27 14.2A8.4 8.4 0 1 0 28.4 20" stroke="' + stroke + '" stroke-width="2.2" stroke-linecap="round"/>' +
-    '<circle class="core" cx="20" cy="20" r="2.9" fill="' + core + '"/></svg>';
+    '<path class="d" d="M14 26A8.5 8.5 0 1 1 26 26" stroke="' + stroke + '" stroke-width="2.2" stroke-linecap="round"/>' +
+    '<g class="needle"><path d="M20 20L25 14.2" stroke="' + core + '" stroke-width="2.4" stroke-linecap="round"/></g>' +
+    '<circle class="core" cx="20" cy="20" r="2.6" fill="' + core + '"/></svg>';
 }
 function setFavicon() {
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="9" fill="#101311"/><defs><linearGradient id="g" x1="4" y1="3" x2="36" y2="37"><stop offset="0" stop-color="#e8c777"/><stop offset="1" stop-color="#9fb7c4"/></linearGradient></defs><path d="M20 5L33 12.3V27.7L20 35L7 27.7V12.3Z" stroke="url(#g)" stroke-width="2.6" stroke-linejoin="round"/><path d="M26 15A7.4 7.4 0 1 0 27.4 20" stroke="url(#g)" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="2.6" fill="#9fb7c4"/></svg>';
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="9" fill="#101311"/><defs><linearGradient id="g" x1="4" y1="3" x2="36" y2="37"><stop offset="0" stop-color="#e8c777"/><stop offset="1" stop-color="#9fb7c4"/></linearGradient></defs><path d="M20 5L33 12.3V27.7L20 35L7 27.7V12.3Z" stroke="url(#g)" stroke-width="2.6" stroke-linejoin="round"/><path d="M14.5 25.5A8 8 0 1 1 25.5 25.5" stroke="url(#g)" stroke-width="2.4" stroke-linecap="round"/><path d="M20 20L24.6 14.6" stroke="#9fb7c4" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="2.6" fill="#9fb7c4"/></svg>';
   let l = document.querySelector('link[rel="icon"]');
   if (!l) { l = document.createElement("link"); l.rel = "icon"; document.head.appendChild(l); }
   l.type = "image/svg+xml"; l.href = "data:image/svg+xml," + encodeURIComponent(svg);
@@ -169,7 +170,7 @@ function sectionOf(n) { return n === "home" ? "home" : n.startsWith("docs") ? "d
 function marketingShell(name, inner) {
   const cur = sectionOf(name);
   const nav = MKT_NAV.map(([k, t]) => '<a href="#' + k + '"' + (cur === k ? ' aria-current="page"' : "") + ">" + t + "</a>").join("");
-  return '<a class="skip" href="#main">Skip to content</a><header class="site-head"><div class="wrap"><a class="brand" href="#home" aria-label="Allowance Vault home">' + logo({ size: 30 }) + "<span>Allowance Vault</span></a>" +
+  return '<a class="skip" href="#main">Skip to content</a><header class="site-head"><div class="wrap"><a class="brand" href="#home" aria-label="Allowance Vault home">' + logo({ size: 30, animated: name === "home" }) + "<span>Allowance Vault</span></a>" +
     '<button class="btn small menu-btn" data-a="menu" aria-expanded="false" aria-controls="mnav">Menu</button><nav class="nav" id="mnav" aria-label="Primary">' + nav + '</nav><a class="btn primary small" href="#app-security">Try to break it</a></div></header>' +
     '<main id="main" tabindex="-1">' + inner + "</main>" + footer();
 }

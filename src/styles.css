@@ -343,3 +343,9 @@ h1, h2, h3, h4 { font-stretch: 112%; font-weight: 800; letter-spacing: -0.01em; 
 }
 
 #main:focus, #main:focus-visible, #labres:focus { outline: none; }
+
+.logo-draw .needle { transform-origin: 20px 20px; transform-box: view-box; animation: swing 1.3s 0.7s cubic-bezier(.2,1.5,.4,1) both; }
+@keyframes swing { from { transform: rotate(-110deg); } to { transform: rotate(0); } }
+.gauge { transform-origin: 160px 273px; transform-box: view-box; animation: gaugefill 6s ease-in-out infinite; }
+@keyframes gaugefill { 0%, 33% { transform: scaleX(1); } 40% { transform: scaleX(.8); } 100% { transform: scaleX(.94); } }
+@media (max-width: 640px) { .viz { overflow-x: auto; } .viz svg { min-width: 620px; } .viz .caption::before { content: "Swipe sideways to see the whole flow."; flex-basis: 100%; color: var(--warn); } }
