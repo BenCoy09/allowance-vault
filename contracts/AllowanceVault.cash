@@ -1,5 +1,6 @@
-// UNVERIFIED DRAFT. Not compiled. Not tested. Not deployed. Not audited.
-pragma cashscript ^0.13.0;
+// Compiles with cashc 0.14.0. Nine test cases pass in a local VM emulator (see TESTS.md).
+// Not deployed on any chain. Not audited.
+pragma cashscript ^0.14.0;
 
 contract AllowanceVault(
     bytes20 ownerPkh,
@@ -42,7 +43,7 @@ contract AllowanceVault(
         int refilled = min(bucketCap, bucket + refillPerBlock * (newHeight - lastHeight));
         require(amount + fee <= refilled);
         int newBucket = refilled - amount - fee;
-        require(tx.outputs[1].nftCommitment == bytes8(newBucket) + bytes8(newHeight));
+        require(tx.outputs[1].nftCommitment == toPaddedBytes(newBucket, 8) + toPaddedBytes(newHeight, 8));
     }
 
     // Owner path: revoke or withdraw at any time. No agent cooperation needed.

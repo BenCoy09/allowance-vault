@@ -10,8 +10,9 @@ Built for BCH BLAZE 2026. Built with Claude (Anthropic) as a coding assistant.
 | --- | --- |
 | Product site and Security Lab (`src/`) | Implemented |
 | JavaScript reference model of the rules (`src/core.js`) | Implemented, simulation only |
-| CashScript contract (`contracts/AllowanceVault.cash`) | **Unverified draft. Not compiled, not tested, not deployed, not audited.** |
-| Chipnet / mainnet deployment | Not done |
+| CashScript contract (`contracts/AllowanceVault.cash`) | Compiles with cashc 0.14.0. 9 test cases pass in a **local VM emulator** (`test.mjs`, results in `TESTS.md`). |
+| Chipnet / mainnet deployment | **Not done** |
+| Independent audit | **Not done** |
 | Wallet connection, SDK | Not done |
 
 ## Run the site
@@ -22,9 +23,14 @@ Built for BCH BLAZE 2026. Built with Claude (Anthropic) as a coding assistant.
 
 ## Next steps
 
-1. Compile the contract with CashScript and fix what breaks.
-2. Write tests for each attack in the Security Lab.
-3. Run them on chipnet, keep raw transactions and node errors.
-4. Mainnet vault with a small balance.
+1. Test the remaining attacks (forged clock, token output, expiry reclaim, chained spends).
+2. Deploy on chipnet and keep raw transactions and node errors.
+3. Mainnet vault with a small balance.
+4. Independent review.
+
+## Test the contract
+
+    npm install
+    npm test
 
 License: MIT

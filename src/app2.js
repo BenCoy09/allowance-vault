@@ -62,8 +62,8 @@ reg("home", "Agents that can't overspend", "marketing", n => marketingShell(n,
   '<div class="panel"><span class="fi">' + icon("hourglass") + '</span><h3>Expiry reclaim ' + STATUS.unverified() + "</h3><p>After expiry, anyone can send the funds to a refund address fixed when the vault was made.</p></div>" +
   '<div class="panel"><span class="fi">' + icon("shield") + '</span><h3>Independent audit ' + STATUS.planned() + '</h3><p>None yet. Treat every claim on this page as unproven until the contract is tested and reviewed.</p></div></div></div></section>' +
 
-  '<section class="section"><div class="wrap"><h2>For developers</h2><p class="sub muted" style="margin-top:10px">A draft contract and a runnable reference model exist. The SDK is a design sketch.</p><div class="grid2" style="margin-top:24px"><div>' +
-  code("cashscript", AV.CONTRACT_DRAFT.split("\n").slice(0, 24).join("\n") + "\n    // ...", "AllowanceVault.cash (first lines of the draft)") + '</div><div class="panel"><h3>What you can use today</h3><ul class="steplog" style="margin-top:10px"><li>The <a href="#app-security">Security Lab</a> runs nine attacks against the reference model.</li><li>The <a href="#docs-api">contract draft</a> is readable. It has not been compiled.</li><li>The <a href="#docs-sdk">SDK sketch</a> shows the planned shape of an integration.</li></ul><div class="row" style="margin-top:16px"><a class="btn primary" href="#developers">Developer portal</a><a class="btn" href="#docs-quickstart">Quickstart</a></div></div></div></div></section>' +
+  '<section class="section"><div class="wrap"><h2>For developers</h2><p class="sub muted" style="margin-top:10px">A compiled contract (tested in a local emulator) and a runnable reference model exist. The SDK is a design sketch.</p><div class="grid2" style="margin-top:24px"><div>' +
+  code("cashscript", AV.CONTRACT_DRAFT.split("\n").slice(0, 24).join("\n") + "\n    // ...", "AllowanceVault.cash (first lines)") + '</div><div class="panel"><h3>What you can use today</h3><ul class="steplog" style="margin-top:10px"><li>The <a href="#app-security">Security Lab</a> runs nine attacks against the reference model.</li><li>The <a href="#docs-api">contract draft</a> is readable. It has not been compiled.</li><li>The <a href="#docs-sdk">SDK sketch</a> shows the planned shape of an integration.</li></ul><div class="row" style="margin-top:16px"><a class="btn primary" href="#developers">Developer portal</a><a class="btn" href="#docs-quickstart">Quickstart</a></div></div></div></div></section>' +
 
   '<div class="wrap"><div class="cta-band"><div><h2>Build agents that can\'t spend beyond their authority.</h2><p class="muted" style="margin-top:8px">Try to break the rules first. Then design a vault of your own.</p></div><div class="row"><a class="btn primary" href="#app-security">Open the Security Lab</a><a class="btn" href="#app-vaults-new">Design a vault</a></div></div></div>'));
 
@@ -72,7 +72,7 @@ const IMPL = [
   ["Reference model: 12 rule checks in JavaScript", "implemented", "Runs in this page. It models the planned covenant. It is not the covenant."],
   ["Security Lab: nine attacks and a free-form tester", "simulated", "Every verdict comes from the reference model, not from a chain."],
   ["CashAddr checksum check in the vault wizard", "implemented", "Checks format and checksum only."],
-  ["AllowanceVault CashScript contract", "unverified", "A draft. Not compiled, not tested, not deployed, not audited."],
+  ["AllowanceVault CashScript contract", "implemented", "Compiles with cashc 0.14.0. Nine test cases pass in a local VM emulator. Not on any chain, not audited."],
   ["Chipnet deployment and reproduction packets", "planned", "Needs a machine that can compile and broadcast."],
   ["Mainnet vault with a small balance", "planned", "Required for the BLAZE submission. Not started."],
   ["Wallet connection (WizardConnect or XO template)", "planned", "The Connect wallet button is disabled until this exists."],
@@ -144,7 +144,7 @@ actions.delVault = async el => {
 
 /* ---------- wizard ---------- */
 const WSTEPS = ["Basics", "Limits and expiry", "Recipients", "Review"];
-const W = { step: 0, name: "Research agent vault", agent: "Research agent", funding: 300000, perTxCap: 40000, bucketCap: 100000, refillPerBlock: 500, maxFee: 500, expiryDays: 7, ra: true, rb: true, custom: "", touched: {} };
+const W = { step: 0, name: "Research agent vault", agent: "Research agent", funding: 300000, perTxCap: 40000, bucketCap: 100000, refillPerBlock: 500, maxFee: 2000, expiryDays: 7, ra: true, rb: true, custom: "", touched: {} };
 function wErrors(step) {
   const e = {}; const int = x => Number.isInteger(Number(x)) && String(x).trim() !== "";
   if (step >= 0) { if (!W.name.trim()) e.name = "Give the vault a name."; else if (W.name.length > 40) e.name = "Keep the name under 40 characters."; if (!W.agent.trim()) e.agent = "Name the agent this key is for."; }

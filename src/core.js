@@ -18,7 +18,7 @@ const AV = (() => {
       perTxCap: 40000,           // sats per payment
       bucketCap: 100000,         // sats, maximum the bucket can hold
       refillPerBlock: 500,       // sats added per block
-      maxFee: 500,               // sats, maximum miner fee per spend
+      maxFee: 2000,              // sats, maximum miner fee per spend
       expiryHeight: 901008,      // block height
       allowlist: ["payee-a", "payee-b"],
       bucket: 100000,
@@ -100,7 +100,7 @@ const AV = (() => {
   /* legitimate baseline transaction against a vault */
   function legit(v, over) {
     const height = v.lastHeight + 1;
-    const amount = 20000, fee = 300;
+    const amount = 20000, fee = 1000;
     const tx = {
       signer: "agent", inputs: 1,
       outputs: [{ lock: "payee-a", value: amount, token: false }, { lock: "vault", value: v.balance - amount - fee, keepsNft: true }],
@@ -126,7 +126,7 @@ const AV = (() => {
       expect: "The per-payment cap is 40,000 sats, so the covenant rejects it.",
       run() {
         const v = newVault();
-        const tx = mk(v, 200000, 300, "payee-a");
+        const tx = mk(v, 200000, 1000, "payee-a");
         return { vault: v, steps: [{ label: "Agent key signs a 200,000 sat payment to Payee A", tx, res: evaluate(v, tx) }] };
       },
     },
@@ -135,7 +135,7 @@ const AV = (() => {
       expect: "The recipient is not on the approved list, so the covenant rejects it.",
       run() {
         const v = newVault();
-        const tx = mk(v, 10000, 300, "attacker");
+        const tx = mk(v, 10000, 1000, "attacker");
         return { vault: v, steps: [{ label: "Agent key signs a 10,000 sat payment to the attacker address", tx, res: evaluate(v, tx) }] };
       },
     },
@@ -146,7 +146,7 @@ const AV = (() => {
         const v = newVault();
         const steps = [];
         for (let i = 1; i <= 3; i++) {
-          const tx = mk(v, 40000, 300, "payee-a", { newHeight: v.lastHeight, locktime: v.lastHeight });
+          const tx = mk(v, 40000, 1000, "payee-a", { newHeight: v.lastHeight, locktime: v.lastHeight });
           const res = evaluate(v, tx);
           steps.push({ label: "Payment " + i + " of 40,000 sats to Payee A", tx, res });
           apply(v, tx, res);
@@ -161,7 +161,7 @@ const AV = (() => {
       run() {
         const v = newVault();
         const h = v.expiryHeight + 5;
-        const tx = mk(v, 10000, 300, "payee-a", { newHeight: h, locktime: h });
+        const tx = mk(v, 10000, 1000, "payee-a", { newHeight: h, locktime: h });
         return { vault: v, steps: [{ label: "Agent key signs a 10,000 sat payment at height " + h, tx, res: evaluate(v, tx) }] };
       },
     },
@@ -173,7 +173,7 @@ const AV = (() => {
         const steps = [];
         const sweep = ownerSweep(v);
         steps.push({ label: "Owner signs a sweep (revocation)", owner: true, res: { accepted: true, checks: [{ id: "owner", label: "Owner signature", pass: true, detail: sweep.note }], firstFail: null } });
-        const tx = mk(v, 10000, 300, "payee-a");
+        const tx = mk(v, 10000, 1000, "payee-a");
         steps.push({ label: "Agent key signs a 10,000 sat payment to Payee A", tx, res: evaluate(v, tx) });
         return { vault: v, steps };
       },
@@ -183,14 +183,14 @@ const AV = (() => {
       expect: "Output 1 must use the vault's own locking script, so the covenant rejects it.",
       run() {
         const v = newVault();
-        const tx = mk(v, 10000, 300, "payee-a");
-        tx.outputs[1] = { lock: "attacker", value: v.balance - 10000 - 300, keepsNft: false };
+        const tx = mk(v, 10000, 1000, "payee-a");
+        tx.outputs[1] = { lock: "attacker", value: v.balance - 10000 - 1000, keepsNft: false };
         return { vault: v, steps: [{ label: "Agent key signs a payment whose change goes to the attacker", tx, res: evaluate(v, tx) }] };
       },
     },
     {
       id: "a07", name: "Attack 07: Fee inflation", short: "Pay a huge miner fee to move value out through a cooperating miner.",
-      expect: "The fee is inputs minus outputs and is capped at 500 sats, so the covenant rejects it.",
+      expect: "The fee is inputs minus outputs and is capped at 2,000 sats, so the covenant rejects it.",
       run() {
         const v = newVault();
         const tx = mk(v, 10000, 30000, "payee-a");
@@ -202,7 +202,7 @@ const AV = (() => {
       expect: "A final sequence disables locktime, so the contract's time check fails.",
       run() {
         const v = newVault({ bucket: 0 });
-        const tx = mk(v, 30000, 300, "payee-a", { newHeight: v.lastHeight + 400, locktime: 0, sequenceFinal: true });
+        const tx = mk(v, 30000, 1000, "payee-a", { newHeight: v.lastHeight + 400, locktime: 0, sequenceFinal: true });
         return { vault: v, steps: [{ label: "Agent key signs with a final sequence, claiming 400 blocks of refill", tx, res: evaluate(v, tx) }] };
       },
     },
@@ -211,15 +211,16 @@ const AV = (() => {
       expect: "The payment output must hold no tokens, so the covenant rejects it.",
       run() {
         const v = newVault();
-        const tx = mk(v, 10000, 300, "payee-a");
+        const tx = mk(v, 10000, 1000, "payee-a");
         tx.outputs[0].token = true;
         return { vault: v, steps: [{ label: "Agent key signs a payment whose output carries a token", tx, res: evaluate(v, tx) }] };
       },
     },
   ];
 
-  const CONTRACT_DRAFT = `// UNVERIFIED DRAFT. Not compiled. Not tested. Not deployed. Not audited.
-pragma cashscript ^0.13.0;
+  const CONTRACT_DRAFT = `// Compiles with cashc 0.14.0. Nine test cases pass in a local VM emulator (see TESTS.md).
+// Not deployed on any chain. Not audited.
+pragma cashscript ^0.14.0;
 
 contract AllowanceVault(
     bytes20 ownerPkh,
@@ -262,7 +263,7 @@ contract AllowanceVault(
         int refilled = min(bucketCap, bucket + refillPerBlock * (newHeight - lastHeight));
         require(amount + fee <= refilled);
         int newBucket = refilled - amount - fee;
-        require(tx.outputs[1].nftCommitment == bytes8(newBucket) + bytes8(newHeight));
+        require(tx.outputs[1].nftCommitment == toPaddedBytes(newBucket, 8) + toPaddedBytes(newHeight, 8));
     }
 
     // Owner path: revoke or withdraw at any time. No agent cooperation needed.
